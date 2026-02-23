@@ -1,0 +1,165 @@
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: cohortsec-postgres
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-cohortsec}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-cohortsec_secure_password_change_me}
+      POSTGRES_DB: ${POSTGRES_DB:-cohortsec_db}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-cohortsec} -d ${POSTGRES_DB:-cohortsec_db}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - cohortsec_net
+
+  redis:
+    image: redis:7-alpine
+    container_name: cohortsec-redis
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    networks:
+      - cohortsec_net
+
+  minio:
+    image: minio/minio:latest
+    container_name: cohortsec-minio
+    command: server /data
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ACCESS_KEY:-minioadmin}
+      MINIO_ROOT_PASSWORD: ${MINIO_SECRET_KEY:-minioadmin}
+    volumes:
+      - minio_data:/data
+    networks:
+      - cohortsec_net
+      - cohortsec_backup_net
+
+  keycloak:
+    image: keycloak/keycloak:latest
+    container_name: cohortsec-keycloak
+    command: start-dev
+    environment:
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+      KC_DB: postgres
+      KC_DB_URL: jdbc:postgresql://postgres:5432/keycloak
+      KC_DB_USERNAME: ${POSTGRES_USER:-cohortsec}
+      KC_DB_PASSWORD: ${POSTGRES_PASSWORD:-cohortsec_secure_password_change_me}
+      KC_HOSTNAME_STRICT: "false"
+      KC_HTTP_ENABLED: "true"
+    ports:
+      - "8081:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - cohortsec_net
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: cohortsec-backend
+    environment:
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: 5432
+      POSTGRES_USER: ${POSTGRES_USER:-cohortsec}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-cohortsec_secure_password_change_me}
+      POSTGRES_DB: ${POSTGRES_DB:-cohortsec_db}
+      REDIS_URL: redis://redis:6379/0
+      SECRET_KEY: ${SECRET_KEY:-cohortsec-secret-key-change-in-production}
+      ENCRYPTION_KEY: ${ENCRYPTION_KEY:-}
+      MINIO_ENDPOINT: minio:9000
+      MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY:-minioadmin}
+      MINIO_SECRET_KEY: ${MINIO_SECRET_KEY:-minioadmin}
+      MINIO_BUCKET: ${MINIO_BUCKET:-cohortsec-backups}
+      KEYCLOAK_URL: http://keycloak:8080
+      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-http://localhost:3000,http://127.0.0.1:3000}
+    volumes:
+      - ./backend/ml_models:/app/ml_models
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      minio:
+        condition: service_started
+    ports:
+      - "8000:8000"
+    networks:
+      - cohortsec_net
+      - cohortsec_backup_net
+
+  celery_worker:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: cohortsec-celery-worker
+    command: celery -A app.celery_app worker -l info
+    environment:
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: 5432
+      POSTGRES_USER: ${POSTGRES_USER:-cohortsec}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-cohortsec_secure_password_change_me}
+      POSTGRES_DB: ${POSTGRES_DB:-cohortsec_db}
+      REDIS_URL: redis://redis:6379/0
+      SECRET_KEY: ${SECRET_KEY:-cohortsec-secret-key-change-in-production}
+      ENCRYPTION_KEY: ${ENCRYPTION_KEY:-}
+      MINIO_ENDPOINT: minio:9000
+      MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY:-minioadmin}
+      MINIO_SECRET_KEY: ${MINIO_SECRET_KEY:-minioadmin}
+      MINIO_BUCKET: ${MINIO_BUCKET:-cohortsec-backups}
+    volumes:
+      - ./backend/ml_models:/app/ml_models
+    depends_on:
+      - backend
+      - redis
+    networks:
+      - cohortsec_net
+      - cohortsec_backup_net
+
+  celery_beat:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: cohortsec-celery-beat
+    command: celery -A app.celery_app beat -l info
+    environment:
+      POSTGRES_HOST: postgres
+      REDIS_URL: redis://redis:6379/0
+    depends_on:
+      - celery_worker
+    networks:
+      - cohortsec_net
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: cohortsec-frontend
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+    networks:
+      - cohortsec_net
+
+networks:
+  cohortsec_net:
+    driver: bridge
+  cohortsec_backup_net:
+    driver: bridge
+
+volumes:
+  postgres_data:
+  redis_data:
+  minio_data:

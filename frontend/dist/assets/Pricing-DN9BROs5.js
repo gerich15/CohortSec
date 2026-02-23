@@ -1,0 +1,35 @@
+import{j as t,r as v,m as y,a as N}from"./index-BOT2cxnc.js";const A=({className:i})=>t.jsx("svg",{xmlns:"http://www.w3.org/2000/svg",width:"16",height:"16",viewBox:"0 0 24 24",fill:"none",stroke:"currentColor",strokeWidth:"3",strokeLinecap:"round",strokeLinejoin:"round",className:i,children:t.jsx("path",{d:"M20 6 9 17l-5-5"})}),C=()=>{const i=v.useRef(null);return v.useEffect(()=>{const a=i.current;if(!a)return;const e=a.getContext("webgl");if(!e)return;const s="attribute vec2 aPosition; void main() { gl_Position = vec4(aPosition, 0.0, 1.0); }",n=`
+      precision highp float;
+      uniform float iTime;
+      uniform vec2 iResolution;
+      uniform vec3 uBackgroundColor;
+      mat2 rotate2d(float angle){ float c=cos(angle),s=sin(angle); return mat2(c,-s,s,c); }
+      float variation(vec2 v1,vec2 v2,float strength,float speed){ return sin(dot(normalize(v1),normalize(v2))*strength+iTime*speed)/100.0; }
+      vec3 paintCircle(vec2 uv,vec2 center,float rad,float width){
+        vec2 diff = center-uv;
+        float len = length(diff);
+        len += variation(diff,vec2(0.,1.),5.,2.);
+        len -= variation(diff,vec2(1.,0.),5.,2.);
+        float circle = smoothstep(rad-width,rad,len)-smoothstep(rad,rad+width,len);
+        return vec3(circle);
+      }
+      void main(){
+        vec2 uv = gl_FragCoord.xy/iResolution.xy;
+        uv.x *= 1.5; uv.x -= 0.25;
+        float mask = 0.0;
+        float radius = .35;
+        vec2 center = vec2(.5);
+        mask += paintCircle(uv,center,radius,.035).r;
+        mask += paintCircle(uv,center,radius-.018,.01).r;
+        mask += paintCircle(uv,center,radius+.018,.005).r;
+        vec2 v=rotate2d(iTime)*uv;
+        vec3 foregroundColor=vec3(0.23,0.51,0.96);
+        foregroundColor=mix(foregroundColor,vec3(0.,1.,0.67),v.y*0.3);
+        vec3 color=mix(uBackgroundColor,foregroundColor,mask);
+        color=mix(color,vec3(1.),paintCircle(uv,center,radius,.003).r);
+        gl_FragColor=vec4(color,1.);
+      }`,l=(u,j)=>{const o=e.createShader(u);if(!o)throw new Error("Could not create shader");if(e.shaderSource(o,j),e.compileShader(o),!e.getShaderParameter(o,e.COMPILE_STATUS))throw new Error(e.getShaderInfoLog(o)||"Shader compilation error");return o},r=e.createProgram();if(!r)throw new Error("Could not create program");const d=l(e.VERTEX_SHADER,s),m=l(e.FRAGMENT_SHADER,n);e.attachShader(r,d),e.attachShader(r,m),e.linkProgram(r),e.useProgram(r);const x=e.createBuffer();e.bindBuffer(e.ARRAY_BUFFER,x),e.bufferData(e.ARRAY_BUFFER,new Float32Array([-1,-1,1,-1,-1,1,-1,1,1,-1,1,1]),e.STATIC_DRAW);const c=e.getAttribLocation(r,"aPosition");e.enableVertexAttribArray(c),e.vertexAttribPointer(c,2,e.FLOAT,!1,0,0);const p=e.getUniformLocation(r,"iTime"),w=e.getUniformLocation(r,"iResolution"),b=e.getUniformLocation(r,"uBackgroundColor");e.uniform3fv(b,new Float32Array([.04,.04,.06]));let f;const g=u=>{e.uniform1f(p,u*.001),e.uniform2f(w,a.width,a.height),e.drawArrays(e.TRIANGLES,0,6),f=requestAnimationFrame(g)},h=()=>{a.width=window.innerWidth,a.height=window.innerHeight,e.viewport(0,0,e.drawingBufferWidth,e.drawingBufferHeight)};return h(),window.addEventListener("resize",h),f=requestAnimationFrame(g),()=>{window.removeEventListener("resize",h),cancelAnimationFrame(f)}},[]),t.jsx("canvas",{ref:i,className:"fixed top-0 left-0 w-full h-full block z-0",style:{background:"var(--vg-bg, #0A0A0F)"}})},k=({planName:i,description:a,price:e,period:s,features:n,buttonText:l,isPopular:r=!1,buttonVariant:d="primary"})=>{const m=`
+    backdrop-blur-[14px] rounded-2xl shadow-xl flex-1 max-w-xs px-7 py-8 flex flex-col transition-all duration-300
+    bg-gradient-to-br from-white/10 to-white/5 border border-white/10
+    ${r?"scale-105 relative ring-2 ring-vg-accent/30 shadow-2xl from-white/20 to-white/10":""}
+  `;return t.jsxs(y.div,{initial:{opacity:0,y:20},animate:{opacity:1,y:0},className:m.trim(),children:[r&&t.jsx("div",{className:"absolute -top-4 right-4 px-3 py-1 text-xs font-semibold rounded-full bg-vg-accent text-white",children:"Популярный"}),t.jsxs("div",{className:"mb-3",children:[t.jsx("h2",{className:"text-[42px] font-extralight tracking-tight text-white font-display",children:i}),t.jsx("p",{className:"text-base text-white/70 mt-1",children:a})]}),t.jsxs("div",{className:"my-6 flex items-baseline gap-2",children:[t.jsx("span",{className:"text-[42px] font-extralight text-white font-display",children:e}),t.jsx("span",{className:"text-sm text-white/70",children:s})]}),t.jsx("div",{className:"w-full mb-5 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent"}),t.jsx("ul",{className:"flex flex-col gap-2 text-sm text-white/90 mb-6",children:n.map((x,c)=>t.jsxs("li",{className:"flex items-center gap-2",children:[t.jsx(A,{className:"text-vg-accent w-4 h-4 flex-shrink-0"})," ",x]},c))}),t.jsx("div",{className:"mt-auto",children:t.jsx(N,{to:"/register",className:d==="primary"?"inline-flex items-center justify-center w-full py-3 px-6 rounded-xl font-semibold text-sm bg-vg-accent hover:bg-vg-accent-hover text-white transition-colors":"inline-flex items-center justify-center w-full py-3 px-6 rounded-xl font-semibold text-sm glass text-vg-accent hover:shadow-glow transition-colors border border-white/10",children:l})})]})},S=({title:i,subtitle:a,plans:e,showAnimatedBackground:s=!0})=>t.jsxs("div",{className:"min-h-screen w-full overflow-x-hidden bg-vg-bg text-white",children:[s&&t.jsx(C,{}),t.jsxs("main",{className:"relative z-10 w-full min-h-screen flex flex-col items-center justify-center px-4 py-12",children:[t.jsxs("div",{className:"w-full max-w-5xl mx-auto text-center mb-12",children:[t.jsx("h1",{className:"text-4xl md:text-5xl font-extralight leading-tight tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-white via-vg-accent to-[#00FFAA] font-display",children:i}),t.jsx("p",{className:"mt-3 text-base md:text-lg text-white/80 max-w-2xl mx-auto",children:a})]}),t.jsx("div",{className:"flex flex-col md:flex-row gap-8 md:gap-6 justify-center items-stretch w-full max-w-4xl",children:e.map(n=>t.jsx(k,{...n},n.planName))})]})]}),R=[{planName:"Бесплатно",description:"Базовые возможности для знакомства",price:"0",period:"навсегда",features:["Проверка 10 паролей в месяц","Базовый мониторинг","Email поддержка"],buttonText:"Начать",buttonVariant:"secondary"},{planName:"Семейный",description:"Защита для всей семьи",price:"499",period:"/мес",features:["До 5 пользователей","Предиктивная аналитика","Мониторинг 24/7","Проверка 100 паролей/мес","Приоритетная поддержка"],buttonText:"Выбрать план",isPopular:!0,buttonVariant:"primary"},{planName:"Премиум",description:"Максимальная защита",price:"999",period:"/мес",features:["До 10 пользователей","Всё из Семейного","Квантовый бэкап 100 ГБ","Проверка 1000 паролей/мес","Персональный менеджер"],buttonText:"Связаться с нами",buttonVariant:"primary"}];function F(){return t.jsx(S,{title:t.jsxs(t.Fragment,{children:["Выберите ",t.jsx("span",{className:"text-vg-accent",children:"подходящий план"})," для семьи"]}),subtitle:"Начните бесплатно, затем расширяйте возможности. Гибкие тарифы под любые задачи.",plans:R,showAnimatedBackground:!0})}export{F as default};

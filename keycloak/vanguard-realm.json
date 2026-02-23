@@ -1,0 +1,30 @@
+{
+  "realm": "cohortsec",
+  "enabled": true,
+  "sslRequired": "external",
+  "registrationAllowed": false,
+  "loginWithEmailAllowed": true,
+  "duplicateEmailsAllowed": false,
+  "resetPasswordAllowed": true,
+  "editUsernameAllowed": false,
+  "bruteForceProtected": true,
+  "clients": [
+    {
+      "clientId": "cohortsec-frontend",
+      "name": "CohortSec Frontend",
+      "enabled": true,
+      "publicClient": true,
+      "standardFlowEnabled": true,
+      "implicitFlowEnabled": false,
+      "directAccessGrantsEnabled": true,
+      "webOrigins": ["http://localhost:3000", "http://127.0.0.1:3000"],
+      "redirectUris": ["http://localhost:3000/*", "http://127.0.0.1:3000/*"]
+    }
+  ],
+  "roles": {
+    "realm": [
+      { "name": "admin", "description": "Administrator" },
+      { "name": "user", "description": "Regular user" }
+    ]
+  }
+}
