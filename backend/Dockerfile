@@ -29,6 +29,8 @@ COPY --from=builder /usr/local/bin /usr/local/bin
 COPY app/ ./app/
 COPY ml_models/ ./ml_models/
 COPY scripts/ ./scripts/
+COPY telegram_bot/ ./telegram_bot/
+COPY run_bot.py ./
 
 RUN mkdir -p ml_models uploads \
     && chown -R appuser:appuser /app

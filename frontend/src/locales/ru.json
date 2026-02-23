@@ -106,6 +106,7 @@
     "backup": "Бэкапы",
     "security": "Безопасность",
     "events": "События",
+    "notifications": "Уведомления",
     "support": "Поддержка",
     "settings": "Настройки",
     "logout": "Выход"
@@ -123,6 +124,21 @@
     "has_account": "Уже есть аккаунт?",
     "mfa_title": "Второй ключ",
     "mfa_hint": "Введите 6-значный код из приложения"
+  },
+  "notifications": {
+    "title": "Уведомления",
+    "telegram_connect": "Подключить Telegram",
+    "telegram_connected": "Telegram подключён",
+    "telegram_connect_hint": "Получайте важные алерты о безопасности в Telegram. Ссылка действительна 5 минут.",
+    "connect_btn": "Получить ссылку",
+    "open_bot": "Открыть бота",
+    "test_notification": "Отправить тест",
+    "test_sent": "Тест отправлен в Telegram",
+    "push": "Push-уведомления",
+    "news": "Новости",
+    "lifehacks": "Лайфхаки",
+    "important_note": "Важные уведомления (подозрительная активность, взлом) отключить нельзя — это ваша безопасность.",
+    "subscribe": "Подписка на уведомления"
   },
   "onboarding": {
     "welcome": "Добро пожаловать в CohortSec — ваш персональный цифровой телохранитель",

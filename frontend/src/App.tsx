@@ -41,6 +41,7 @@ const PrivacyPolicy = lazy(() => import("./pages/legal/PrivacyPolicy"));
 const TermsOfService = lazy(() => import("./pages/legal/TermsOfService"));
 const Eula = lazy(() => import("./pages/legal/Eula"));
 const CybercrimeStats = lazy(() => import("./pages/CybercrimeStats"));
+const Notifications = lazy(() => import("./pages/Notifications"));
 
 function PageFallback() {
   return <div className="flex min-h-[200px] items-center justify-center text-gray-500">Загрузка…</div>;
@@ -103,6 +104,7 @@ export default function App() {
         <Route path="backup" element={<Backup />} />
         <Route path="security" element={<Security />} />
         <Route path="events" element={<Anomalies />} />
+        <Route path="notifications" element={<Notifications />} />
         <Route path="support" element={<Support />} />
       </Route>
       <Route path="/404" element={<NotFound />} />

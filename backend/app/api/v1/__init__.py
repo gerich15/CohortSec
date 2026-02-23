@@ -17,6 +17,8 @@ from app.api.endpoints import (
     osint,
     fraud_help,
     support,
+    bot_tools,
+    notifications,
 )
 from app.core.config import get_settings
 
@@ -38,3 +40,5 @@ router.include_router(password_check.router)
 router.include_router(osint.router)
 router.include_router(fraud_help.router)
 router.include_router(support.router)
+router.include_router(bot_tools.router)
+router.include_router(notifications.router)

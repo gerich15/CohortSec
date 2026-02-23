@@ -166,6 +166,14 @@ def login(
             score=score,
         )
         db.add(anomaly)
+        # Notify via Telegram if user has linked bot
+        try:
+            from app.services.telegram_notify import get_telegram_ids_for_user, notify_suspicious_activity
+            tids = get_telegram_ids_for_user(user.id)
+            if tids:
+                notify_suspicious_activity(desc, tids)
+        except Exception:
+            pass
     db.commit()
 
     if user.mfa_enabled and user.totp_secret:

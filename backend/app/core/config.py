@@ -132,6 +132,19 @@ class Settings(BaseSettings):
         alias="KEYCLOAK_CLIENT_SECRET",
     )
 
+    # Telegram Bot
+    telegram_bot_token: str = Field(default="", alias="TELEGRAM_BOT_TOKEN")
+    telegram_bot_api_secret: str = Field(default="", alias="TELEGRAM_BOT_API_SECRET")
+    cohortsec_channel_url: str = Field(
+        default="https://t.me/cohortsec",
+        alias="COHORTSEC_CHANNEL_URL",
+    )
+    telegram_bot_link: str = Field(
+        default="https://t.me/cohortsec_bot",
+        alias="TELEGRAM_BOT_LINK",
+        description="Full link to open bot (e.g. https://t.me/YourBotName)",
+    )
+
 
 @lru_cache
 def get_settings() -> Settings:

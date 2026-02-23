@@ -44,11 +44,14 @@ slowapi==0.1.9
 # ClamAV (optional antivirus)
 pyclamd==0.4.0
 
+# Telegram Bot
+python-telegram-bot==21.7
+
 # Utils
 pydantic[email]==2.6.1
 pydantic-settings==2.1.0
 python-dotenv==1.0.1
-httpx==0.26.0
+httpx>=0.27,<0.29
 websockets==12.0
 
 # Logging

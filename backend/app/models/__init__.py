@@ -13,6 +13,8 @@ from app.models.onboarding import OnboardingStatus
 from app.models.simple_backup_config import SimpleBackupConfig
 from app.models.fraud_report import FraudReport
 from app.models.support import SupportMessage, SupportTicket
+from app.models.telegram_bot_user import TelegramBotUser
+from app.models.notification_link_token import NotificationLinkToken
 
 __all__ = [
     "User",
@@ -32,4 +34,6 @@ __all__ = [
     "FraudReport",
     "SupportTicket",
     "SupportMessage",
+    "TelegramBotUser",
+    "NotificationLinkToken",
 ]

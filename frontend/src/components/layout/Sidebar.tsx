@@ -1,5 +1,5 @@
 import { Link, NavLink } from "react-router-dom";
-import { LayoutDashboard, Users, HardDrive, Shield, Zap, Search, MessageCircle } from "lucide-react";
+import { LayoutDashboard, Users, HardDrive, Shield, Zap, Search, MessageCircle, Bell } from "lucide-react";
 import { useLocale } from "../../hooks/useLocale";
 import { clsx } from "clsx";
 
@@ -10,6 +10,7 @@ const items = [
   { to: "/app/backup", icon: HardDrive, key: "backup" },
   { to: "/app/security", icon: Shield, key: "security" },
   { to: "/app/events", icon: Zap, key: "events" },
+  { to: "/app/notifications", icon: Bell, key: "notifications" },
   { to: "/app/support", icon: MessageCircle, key: "support" },
 ];
 

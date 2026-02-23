@@ -84,6 +84,9 @@ services:
       MINIO_BUCKET: ${MINIO_BUCKET:-cohortsec-backups}
       KEYCLOAK_URL: http://keycloak:8080
       ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-http://localhost:3000,http://127.0.0.1:3000}
+      TELEGRAM_BOT_LINK: ${TELEGRAM_BOT_LINK:-https://t.me/cohortsec_bot}
+      TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN:-}
+      TELEGRAM_BOT_API_SECRET: ${TELEGRAM_BOT_API_SECRET:-}
     volumes:
       - ./backend/ml_models:/app/ml_models
     depends_on:
@@ -150,6 +153,32 @@ services:
       - "3000:80"
     depends_on:
       - backend
+    networks:
+      - cohortsec_net
+
+  telegram_bot:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: cohortsec-telegram-bot
+    command: python run_bot.py
+    environment:
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: 5432
+      POSTGRES_USER: ${POSTGRES_USER:-cohortsec}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-cohortsec_secure_password_change_me}
+      POSTGRES_DB: ${POSTGRES_DB:-cohortsec_db}
+      TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN:-}
+      TELEGRAM_BOT_API_SECRET: ${TELEGRAM_BOT_API_SECRET:-}
+      COHORTSEC_CHANNEL_URL: ${COHORTSEC_CHANNEL_URL:-https://t.me/cohortsec}
+      TELEGRAM_BOT_LINK: ${TELEGRAM_BOT_LINK:-https://t.me/cohortsec_bot}
+    env_file:
+      - .env
+    depends_on:
+      backend:
+        condition: service_started
+      postgres:
+        condition: service_healthy
     networks:
       - cohortsec_net
 

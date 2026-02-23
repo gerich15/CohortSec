@@ -165,6 +165,29 @@ export const triggerBackup = (config_id: number) =>
   api.post("/backup/trigger", { config_id });
 export const getBackupLogs = () => api.get("/backup/logs");
 
+// Notifications
+export const createTelegramLinkToken = () =>
+  api.post<{ bot_link: string; token: string; expires_in: number }>(
+    "/notifications/telegram-link-token"
+  );
+export const getNotificationPreferences = () =>
+  api.get<{
+    telegram_linked: boolean;
+    push_enabled: boolean;
+    news_enabled: boolean;
+    lifehacks_enabled: boolean;
+    is_subscribed: boolean;
+  bot_link?: string;
+  }>("/notifications/preferences");
+export const updateNotificationPreferences = (data: {
+  push_enabled?: boolean;
+  news_enabled?: boolean;
+  lifehacks_enabled?: boolean;
+  is_subscribed?: boolean;
+}) => api.put("/notifications/preferences", data);
+export const sendTestNotification = () =>
+  api.post<{ sent: number; message: string }>("/notifications/test");
+
 // Fraud help
 export const getFraudHelpConfig = () =>
   api.get<{ recaptcha_site_key: string }>("/fraud-help/config");

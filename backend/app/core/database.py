@@ -35,6 +35,8 @@ def run_migrations() -> None:
     migrations = [
         "ALTER TABLE users ADD COLUMN IF NOT EXISTS subscription_tier VARCHAR(50) DEFAULT 'free'",
         "ALTER TABLE fraud_reports ADD COLUMN IF NOT EXISTS attachment_paths JSON",
+        "ALTER TABLE telegram_bot_users ADD COLUMN IF NOT EXISTS user_id INTEGER REFERENCES users(id) ON DELETE SET NULL",
+        "CREATE TABLE IF NOT EXISTS notification_link_tokens (id SERIAL PRIMARY KEY, token VARCHAR(64) UNIQUE NOT NULL, user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE, created_at TIMESTAMP DEFAULT NOW())",
     ]
     for sql in migrations:
         try:
@@ -62,6 +64,8 @@ def init_db() -> None:
         FraudReport,
         SupportMessage,
         SupportTicket,
+        TelegramBotUser,
+        NotificationLinkToken,
         User,
         UserAction,
         UserSession,
