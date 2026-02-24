@@ -19,6 +19,7 @@ from app.api.endpoints import (
     support,
     bot_tools,
     notifications,
+    security,
 )
 from app.core.config import get_settings
 
@@ -42,3 +43,4 @@ router.include_router(fraud_help.router)
 router.include_router(support.router)
 router.include_router(bot_tools.router)
 router.include_router(notifications.router)
+router.include_router(security.router)

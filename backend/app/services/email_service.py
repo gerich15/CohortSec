@@ -125,3 +125,36 @@ CohortSec — Ваш цифровой телохранитель"""
         return True
     except Exception:
         return False
+
+
+def send_verification_code_email(to_email: str, code: str, purpose: str = "verify_contact") -> bool:
+    """Send verification code to email (for backup contacts, password recovery)."""
+    settings = get_settings()
+    if not settings.smtp_host:
+        return False
+    try:
+        msg = MIMEMultipart("alternative")
+        msg["Subject"] = "CohortSec — код подтверждения"
+        msg["From"] = settings.smtp_from
+        msg["To"] = to_email
+        text = f"""Ваш код подтверждения: {code}
+
+Код действителен 10 минут. Никому не сообщайте этот код.
+
+—
+CohortSec"""
+        html = f"""<html><body style="font-family:sans-serif;">
+<p>Ваш код подтверждения: <strong>{code}</strong></p>
+<p>Код действителен 10 минут. Никому не сообщайте этот код.</p>
+<p>—<br>CohortSec</p>
+</body></html>"""
+        msg.attach(MIMEText(text, "plain"))
+        msg.attach(MIMEText(html, "html"))
+        with smtplib.SMTP(settings.smtp_host, settings.smtp_port) as server:
+            if settings.smtp_user and settings.smtp_password:
+                server.starttls()
+                server.login(settings.smtp_user, settings.smtp_password)
+            server.sendmail(settings.smtp_from, [to_email], msg.as_string())
+        return True
+    except Exception:
+        return False

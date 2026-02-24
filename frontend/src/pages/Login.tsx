@@ -1,15 +1,15 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { useLocale } from "../hooks/useLocale";
-import { login, verifyMFA } from "../api/client";
+import { login, verifyMFA, securityApi } from "../api/client";
 import {
   AuthLayout,
   AuthSeparator,
   AuthInput,
   Button,
 } from "../components/auth/AuthLayout";
-import { Github } from "lucide-react";
+import { Github, ScanFace } from "lucide-react";
 import toast from "react-hot-toast";
 import { GoogleIcon, YandexIcon } from "../components/auth/SocialIcons";
 
@@ -22,6 +22,11 @@ export default function Login() {
   const [mfaRequired, setMfaRequired] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [showFaceLogin, setShowFaceLogin] = useState(false);
+  const [faceError, setFaceError] = useState("");
+  const [faceLoading, setFaceLoading] = useState(false);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const streamRef = useRef<MediaStream | null>(null);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -56,6 +61,61 @@ export default function Login() {
       setError(msg || "Неверный код");
     } finally {
       setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (showFaceLogin && videoRef.current) {
+      navigator.mediaDevices
+        .getUserMedia({ video: { facingMode: "user" } })
+        .then((s) => {
+          streamRef.current = s;
+          if (videoRef.current) videoRef.current.srcObject = s;
+        })
+        .catch(() => setFaceError("Камера недоступна"));
+    }
+    return () => {
+      streamRef.current?.getTracks().forEach((t) => t.stop());
+    };
+  }, [showFaceLogin]);
+
+  const captureAndLogin = async () => {
+    if (!videoRef.current) return;
+    setFaceLoading(true);
+    setFaceError("");
+    try {
+      const canvas = document.createElement("canvas");
+      canvas.width = videoRef.current.videoWidth;
+      canvas.height = videoRef.current.videoHeight;
+      canvas.getContext("2d")?.drawImage(videoRef.current, 0, 0);
+      canvas.toBlob(
+        async (blob) => {
+          if (!blob) {
+            setFaceError("Не удалось сделать снимок");
+            setFaceLoading(false);
+            return;
+          }
+          try {
+            const file = new File([blob], "face.jpg", { type: "image/jpeg" });
+            const { data } = await securityApi.loginByFace(file);
+            if (data.access_token) {
+              sessionStorage.setItem("token", data.access_token);
+              toast.success("Вход выполнен");
+              navigate("/app", { replace: true });
+            }
+          } catch (e: unknown) {
+            const msg = (e as { response?: { data?: { detail?: string } } })?.response?.data?.detail;
+            setFaceError(msg || "Лицо не распознано");
+          } finally {
+            setFaceLoading(false);
+          }
+        },
+        "image/jpeg",
+        0.9
+      );
+    } catch {
+      setFaceError("Ошибка");
+      setFaceLoading(false);
     }
   };
 
@@ -136,6 +196,19 @@ export default function Login() {
 
         <AuthSeparator />
 
+        <Button
+          type="button"
+          size="lg"
+          variant="secondary"
+          className="w-full"
+          onClick={() => setShowFaceLogin(true)}
+          leftIcon={<ScanFace className="h-4 w-4" />}
+        >
+          Войти по лицу
+        </Button>
+
+        <AuthSeparator />
+
         <motion.form
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
@@ -173,6 +246,40 @@ export default function Login() {
         </p>
         <p className="text-xs text-vg-muted">Демо: admin / admin</p>
       </div>
+
+      {showFaceLogin && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4">
+          <div className="bg-vg-surface rounded-xl p-6 max-w-md w-full">
+            <h3 className="font-semibold mb-4 flex items-center gap-2">
+              <ScanFace className="w-5 h-5" />
+              Вход по лицу
+            </h3>
+            <div className="relative aspect-video bg-black rounded-lg overflow-hidden mb-4">
+              <video
+                ref={videoRef}
+                autoPlay
+                playsInline
+                muted
+                className="w-full h-full object-cover"
+              />
+            </div>
+            {faceError && <p className="text-sm text-vg-danger mb-2">{faceError}</p>}
+            <div className="flex gap-2">
+              <Button
+                className="flex-1"
+                onClick={captureAndLogin}
+                loading={faceLoading}
+                disabled={faceLoading}
+              >
+                Войти
+              </Button>
+              <Button variant="ghost" onClick={() => setShowFaceLogin(false)}>
+                Отмена
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </AuthLayout>
   );
 }

@@ -1,0 +1,19 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "default",
+  "description": "Capability for the main window",
+  "windows": ["main"],
+  "permissions": [
+    "core:default",
+    "shell:allow-open",
+    "fs:default",
+    "notification:default",
+    "process:allow-exit",
+    "process:allow-restart",
+    "autostart:allow-enable","autostart:allow-disable","autostart:allow-is-enabled",
+    "allow-get-security-status",
+    "allow-trigger-security-check",
+    "allow-set-autostart",
+    "allow-is-autostart-enabled"
+  ]
+}

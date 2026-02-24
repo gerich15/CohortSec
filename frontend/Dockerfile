@@ -7,6 +7,7 @@ COPY package.json package-lock.json* ./
 RUN npm ci --legacy-peer-deps 2>/dev/null || npm install --legacy-peer-deps
 
 COPY . .
+ENV NODE_OPTIONS="--max-old-space-size=4096"
 RUN npm run build
 
 # Runtime

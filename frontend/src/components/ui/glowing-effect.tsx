@@ -162,6 +162,8 @@ const GlowingEffect = memo(
               "--glowingeffect-border-width": `${borderWidth}px`,
               "--repeating-conic-gradient-times": "5",
               "--gradient": gradient,
+              transform: "translateZ(0)",
+              willChange: "opacity",
             } as React.CSSProperties
           }
           className={clsx(
@@ -176,13 +178,14 @@ const GlowingEffect = memo(
             className={clsx(
               "glow",
               "rounded-[inherit]",
+              "[contain:layout_paint]",
               'after:content-[""] after:rounded-[inherit] after:absolute after:inset-[calc(-1*var(--glowingeffect-border-width))]',
               "after:[border:var(--glowingeffect-border-width)_solid_transparent]",
-              "after:[background:var(--gradient)] after:[background-attachment:fixed]",
+              "after:[background:var(--gradient)]",
               "after:opacity-[var(--active)] after:transition-opacity after:duration-300",
               "after:[mask-clip:padding-box,border-box]",
-              "after:[mask-composite:intersect]",
-              "after:[mask-image:linear-gradient(#0000,#0000),conic-gradient(from_calc((var(--start)-var(--spread))*1deg),#00000000_0deg,#fff,#00000000_calc(var(--spread)*2deg))]"
+              "after:[mask-composite:intersect] after:[-webkit-mask-composite:source-in]",
+              "after:[mask-image:linear-gradient(#0000,#0000),conic-gradient(from_calc((var(--start)-var(--spread))*1deg),#00000000_0deg,rgba(255,255,255,0.3)_25%,#fff_50%,rgba(255,255,255,0.3)_75%,#00000000_calc(var(--spread)*2deg))]"
             )}
           />
         </div>

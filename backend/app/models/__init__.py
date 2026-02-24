@@ -15,6 +15,11 @@ from app.models.fraud_report import FraudReport
 from app.models.support import SupportMessage, SupportTicket
 from app.models.telegram_bot_user import TelegramBotUser
 from app.models.notification_link_token import NotificationLinkToken
+from app.models.face_embedding import FaceEmbedding
+from app.models.backup_contact import BackupContact, VerificationCode
+from app.models.connected_account import ConnectedAccount, ConnectedAccountEvent
+from app.models.security_log import SecurityLog
+from app.models.biometric_settings import BiometricSettings
 
 __all__ = [
     "User",
@@ -36,4 +41,11 @@ __all__ = [
     "SupportMessage",
     "TelegramBotUser",
     "NotificationLinkToken",
+    "FaceEmbedding",
+    "BackupContact",
+    "VerificationCode",
+    "ConnectedAccount",
+    "ConnectedAccountEvent",
+    "SecurityLog",
+    "BiometricSettings",
 ]

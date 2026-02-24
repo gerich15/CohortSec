@@ -1,0 +1,19 @@
+{
+  "name": "cohortsec-desktop",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "tauri dev",
+    "tauri": "tauri",
+    "build": "tauri build",
+    "build:frontend": "cd ../frontend && VITE_API_URL=${VITE_API_URL:-https://api.cohortsec.ru/api/v1} npm run build",
+    "build:windows": "tauri build --target x86_64-pc-windows-msvc",
+    "build:linux": "tauri build --target x86_64-unknown-linux-gnu",
+    "lint": "cd ../frontend && npm run lint"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "@tauri-apps/cli": "^2.0.0"
+  }
+}

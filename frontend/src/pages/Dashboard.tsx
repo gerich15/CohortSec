@@ -20,6 +20,7 @@ import {
   checkSecurity,
   getAnomaliesTimeline,
   getSecurityScore,
+  securityApi,
 } from "../api/client";
 import toast from "react-hot-toast";
 import { useLocale } from "../hooks/useLocale";
@@ -87,6 +88,10 @@ export default function Dashboard() {
     message: string;
   } | null>(null);
   const [score, setScore] = useState(0);
+  const [securityStatus, setSecurityStatus] = useState<{
+    security_level: number;
+    recent_events: { event_type: string; created_at: string; success: boolean }[];
+  } | null>(null);
 
   useEffect(() => {
     getMe()
@@ -98,6 +103,9 @@ export default function Dashboard() {
   }, []);
   useEffect(() => {
     getSecurityScore().then((r) => setScore(r.data.score)).catch(() => setScore(0));
+  }, []);
+  useEffect(() => {
+    securityApi.getSecurityStatus().then((r) => setSecurityStatus(r.data)).catch(() => {});
   }, []);
   useEffect(() => {
     getAnomaliesTimeline(10)
@@ -174,8 +182,16 @@ export default function Dashboard() {
           />
           <div className="grid grid-cols-1 md:grid-cols-[auto_1fr] gap-8 items-start">
             <div className="flex flex-col items-center">
-              <ProgressRing value={score} size={120} strokeWidth={8} />
-              <span className="text-2xl font-bold mt-2 text-white">{score}%</span>
+              <ProgressRing value={securityStatus?.security_level ?? score} size={120} strokeWidth={8} />
+              <span className="text-2xl font-bold mt-2 text-white">{securityStatus?.security_level ?? score}%</span>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="mt-2"
+                onClick={() => navigate("/app/security")}
+              >
+                Настройки безопасности
+              </Button>
             </div>
             <div className="space-y-4">
               <p className="text-sm text-vg-muted">

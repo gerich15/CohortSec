@@ -5,6 +5,7 @@ export default defineConfig({
   plugins: [react()],
   server: {
     port: 3000,
+    open: false, // Не открывать браузер — при Tauri dev окно приложения открывает Tauri
     proxy: {
       "/api": {
         target: "http://localhost:8000",

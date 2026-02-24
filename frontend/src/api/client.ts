@@ -1,6 +1,8 @@
 import axios from "axios";
 
-const API_BASE = "/api/v1";
+// VITE_API_URL: для десктопного приложения — полный URL API (например https://api.cohortsec.ru/api/v1)
+// Для веб — не задавать, используется proxy /api
+const API_BASE = import.meta.env.VITE_API_URL || "/api/v1";
 
 export const api = axios.create({
   baseURL: API_BASE,
@@ -187,6 +189,100 @@ export const updateNotificationPreferences = (data: {
 }) => api.put("/notifications/preferences", data);
 export const sendTestNotification = () =>
   api.post<{ sent: number; message: string }>("/notifications/test");
+
+// Security (biometric, backup contacts, connected accounts, logs)
+export const securityApi = {
+  // Biometric
+  checkBiometricQuality: (file: File) => {
+    const fd = new FormData();
+    fd.append("file", file);
+    return api.post<{ ok: boolean; message: string }>("/security/biometric/quality", fd, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
+  },
+  registerFace: (file: File, label?: string) => {
+    const fd = new FormData();
+    fd.append("file", file);
+    if (label) fd.append("label", label);
+    return api.post<{ message: string; id: number }>("/security/biometric/register", fd, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
+  },
+  listFaces: () =>
+    api.get<{ id: number; label: string; created_at: string }[]>("/security/biometric/faces"),
+  deleteFace: (faceId: number) => api.delete(`/security/biometric/faces/${faceId}`),
+  getBiometricSettings: () =>
+    api.get<{ confidence_threshold: number; failed_attempts: number; locked_until: string | null }>(
+      "/security/biometric/settings"
+    ),
+  updateBiometricSettings: (confidence_threshold: number) =>
+    api.put("/security/biometric/settings", { confidence_threshold }),
+  verifyFace: (file: File) => {
+    const fd = new FormData();
+    fd.append("file", file);
+    return api.post<{ verified: boolean }>("/security/biometric/verify", fd, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
+  },
+  loginByFace: (file: File) => {
+    const fd = new FormData();
+    fd.append("file", file);
+    return api.post<{ access_token: string; refresh_token: string }>("/security/biometric/login", fd, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
+  },
+  // Backup contacts
+  listContacts: () =>
+    api.get<
+      { id: number; contact_type: string; value: string; value_full: string; verified: boolean; is_primary: boolean }[]
+    >("/security/contacts"),
+  addContact: (contact_type: "email" | "phone", value: string) =>
+    api.post<{ id: number; message: string; contact_type: string; dev_code?: string }>(
+      "/security/contacts/add",
+      { contact_type, value }
+    ),
+  verifyContact: (contactId: number, code: string) =>
+    api.post(`/security/contacts/${contactId}/verify`, { code }),
+  setPrimaryContact: (contactId: number) =>
+    api.put(`/security/contacts/${contactId}/primary`),
+  deleteContact: (contactId: number) => api.delete(`/security/contacts/${contactId}`),
+  // Connected accounts
+  listConnectedAccounts: () =>
+    api.get<
+      {
+        id: number;
+        account_type: string;
+        display_name: string;
+        status: string;
+        last_check_at: string | null;
+        last_error: string | null;
+      }[]
+    >("/security/connected-accounts"),
+  addConnectedAccount: (account_type: string, display_name?: string, credentials?: object) =>
+    api.post<{ id: number; message: string }>("/security/connected-accounts/add", {
+      account_type,
+      display_name,
+      credentials,
+    }),
+  refreshConnectedAccount: (accountId: number) =>
+    api.put(`/security/connected-accounts/${accountId}/refresh`),
+  deleteConnectedAccount: (accountId: number) =>
+    api.delete(`/security/connected-accounts/${accountId}`),
+  // Logs & status
+  getSecurityLogs: (event_type?: string) =>
+    api.get<
+      { id: number; event_type: string; details: string | null; ip_address: string | null; success: boolean; created_at: string }[]
+    >("/security/logs", { params: { event_type } }),
+  getSecurityStatus: () =>
+    api.get<{
+      security_level: number;
+      mfa_enabled: boolean;
+      biometric_faces: number;
+      verified_contacts: number;
+      connected_accounts: number;
+      recent_events: { event_type: string; created_at: string; success: boolean }[];
+    }>("/security/status"),
+};
 
 // Fraud help
 export const getFraudHelpConfig = () =>

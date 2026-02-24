@@ -85,18 +85,81 @@ body {
   display: none;
 }
 
-/* Hero graphics - shield (left), bug (right) */
+/* Cyber Crime Presentation */
+.slide-glass {
+  width: 100%;
+  max-width: 48rem;
+  min-height: 22rem;
+}
+.slide-glass--wide {
+  max-width: 80rem;
+}
+.slide-glass,
+.slide-glass--wide {
+  background: rgba(10, 10, 15, 0.45);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 1rem;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  padding: 1.5rem 2rem;
+}
+
+.danger-text {
+  color: #FF3B3B;
+  text-shadow: 0 0 10px rgba(255, 59, 59, 0.5), 0 0 20px rgba(255, 59, 59, 0.3);
+}
+.warning-text {
+  color: #FFAA00;
+  text-shadow: 0 0 10px rgba(255, 170, 0, 0.5);
+}
+.safe-text {
+  color: #00FFAA;
+  text-shadow: 0 0 10px rgba(0, 255, 170, 0.5);
+}
+.stat-number {
+  font-size: clamp(3rem, 10vw, 7rem);
+  font-weight: 800;
+  line-height: 1;
+  background: linear-gradient(135deg, #FF3B3B, #FFAA00);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin: 0.5rem 0;
+}
+.nav-arrow {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(5px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 10;
+  transition: all 0.3s ease;
+}
+.nav-arrow:hover {
+  background: rgba(0, 255, 170, 0.2);
+  border-color: #00FFAA;
+  box-shadow: 0 0 20px rgba(0, 255, 170, 0.3);
+}
+
+/* Hero graphics - glow via SVG filter (HeroGraphics.tsx), not CSS — avoids pixelation on some devices */
 .hero-graphic {
-  filter: drop-shadow(0 0 6px rgba(0,255,170,0.25)) drop-shadow(0 0 12px rgba(59,130,246,0.15));
-  transition: filter 0.3s ease;
+  /* No CSS filter: SVG feGaussianBlur used instead for crisp rendering */
+  transition: opacity 0.3s ease;
 }
 
 .hero-section:hover .hero-graphic {
-  filter: drop-shadow(0 0 20px rgba(0,255,170,0.5)) drop-shadow(0 0 40px rgba(59,130,246,0.35));
+  opacity: 1;
 }
 
 .hero-section:hover .hero-bug .hero-graphic {
-  filter: drop-shadow(0 0 20px rgba(139,92,246,0.5)) drop-shadow(0 0 40px rgba(0,255,170,0.3));
+  opacity: 1;
 }
 
 /* Landing Header & Nav */

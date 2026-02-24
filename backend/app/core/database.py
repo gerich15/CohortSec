@@ -69,6 +69,13 @@ def init_db() -> None:
         User,
         UserAction,
         UserSession,
+        FaceEmbedding,
+        BackupContact,
+        VerificationCode,
+        ConnectedAccount,
+        ConnectedAccountEvent,
+        SecurityLog,
+        BiometricSettings,
     )
 
     Base.metadata.create_all(bind=engine)

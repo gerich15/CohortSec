@@ -57,7 +57,7 @@ function GridItem({ icon, title, description, index }: GridItemProps) {
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.08 }}
     >
-      <div className="relative h-full rounded-[1.25rem] border-[0.75px] border-white/10 p-2 md:rounded-[1.5rem] md:p-3">
+      <div className="relative h-full rounded-[1.25rem] border-[0.75px] border-white/10 p-2 md:rounded-[1.5rem] md:p-3 shadow-[0_0_20px_rgba(59,130,246,0.08),0_0_40px_rgba(0,255,170,0.05)]">
         <GlowingEffect
           spread={40}
           glow

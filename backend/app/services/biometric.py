@@ -26,7 +26,39 @@ except ImportError:
     logger.warning("face_recognition not installed. Biometric auth will use placeholder.")
 
 
-SIMILARITY_THRESHOLD = 0.6
+SIMILARITY_THRESHOLD = 0.65
+MIN_IMAGE_WIDTH = 100
+MIN_IMAGE_HEIGHT = 100
+MIN_FACE_PIXELS = 2500  # ~50x50
+
+
+def check_image_quality(image_bytes: bytes) -> Tuple[bool, str]:
+    """Check if image is suitable for face recognition.
+    Returns (ok, message).
+    """
+    try:
+        img = Image.open(BytesIO(image_bytes))
+        w, h = img.size
+        if w < MIN_IMAGE_WIDTH or h < MIN_IMAGE_HEIGHT:
+            return False, f"Изображение слишком маленькое (минимум {MIN_IMAGE_WIDTH}x{MIN_IMAGE_HEIGHT} px)"
+        if w > 4096 or h > 4096:
+            return False, "Изображение слишком большое"
+        if not FACE_RECOGNITION_AVAILABLE:
+            return True, "ok"
+        image = face_recognition.load_image_file(BytesIO(image_bytes))
+        face_locations = face_recognition.face_locations(image)
+        if not face_locations:
+            return False, "Лицо не обнаружено. Сфотографируйте лицо анфас при хорошем освещении."
+        if len(face_locations) > 1:
+            return False, "Обнаружено несколько лиц. Сфотографируйте только одно лицо."
+        top, right, bottom, left = face_locations[0]
+        face_area = (bottom - top) * (right - left)
+        if face_area < MIN_FACE_PIXELS:
+            return False, "Лицо слишком маленькое на фото. Подойдите ближе или используйте фото с большим разрешением."
+        return True, "ok"
+    except Exception as e:
+        logger.exception("Image quality check failed: %s", e)
+        return False, "Не удалось обработать изображение"
 
 
 def _encode_embedding(embedding: List[float]) -> bytes:

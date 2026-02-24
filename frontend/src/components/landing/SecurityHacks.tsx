@@ -1,96 +1,223 @@
-import { useRef, useState, useEffect } from "react";
-import { motion } from "framer-motion";
-import { ChevronLeft, ChevronRight } from "lucide-react";
-import ScrollReveal from "../animations/ScrollReveal";
-import HackCard from "../ui/HackCard";
+import { useState, useEffect, useCallback } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import {
+  ChevronLeft,
+  ChevronRight,
+  Key,
+  Smartphone,
+  KeyRound,
+  RefreshCw,
+  MousePointer,
+  Wifi,
+  XCircle,
+  HardDrive,
+  ScanFace,
+  ShieldCheck,
+  type LucideIcon,
+} from "lucide-react";
+import HacksBackground from "./HacksBackground";
 
-const hacks = [
-  { number: 1, title: "Длиннее = лучше", desc: "Пароль «ялюблюкотиков123» взломать сложнее, чем «p@ssw0rd». Длина важнее сложности." },
-  { number: 2, title: "Включи второй фактор везде", desc: "Даже если пароль украдут, код из SMS или приложения остановит хакера." },
-  { number: 3, title: "Один пароль — один сервис", desc: "Используй менеджер паролей. Запоминать 100 паролей невозможно, а менеджеру — легко." },
-  { number: 4, title: "Обновляй всё сразу", desc: "Та надоедливая кнопка «обновить» часто закрывает критические уязвимости." },
-  { number: 5, title: "Не кликай вслепую", desc: "Проверяй ссылки перед переходом. Наведи мышь и посмотри адрес внизу браузера." },
-  { number: 6, title: "Чужой Wi‑Fi = опасность", desc: "В кафе не заходи в банк через открытый Wi‑Fi. Используй VPN или мобильный интернет." },
-  { number: 7, title: "Закрой старые аккаунты", desc: "Те страницы, где ты был 10 лет назад, могут взломать и рассылать спам от твоего имени." },
-  { number: 8, title: "Правило 3-2-1", desc: "3 копии данных, на 2 носителях, 1 за пределами дома. CohortSec сделает это за тебя." },
-  { number: 9, title: "Лицо вместо пароля", desc: "Биометрия удобнее и безопаснее. В CohortSec можно входить по селфи." },
-  { number: 10, title: "Проверь, не утекли ли данные", desc: "Наш сервис проверит, не гуляет ли твой пароль по даркнету." },
+const hacks: {
+  number: number;
+  title: string;
+  desc: string;
+  icon: LucideIcon;
+}[] = [
+  {
+    number: 1,
+    title: "Длиннее = лучше",
+    desc: "Пароль «ялюблюкотиков123» взломать сложнее, чем «p@ssw0rd». Длина важнее сложности.",
+    icon: Key,
+  },
+  {
+    number: 2,
+    title: "Включи второй фактор везде",
+    desc: "Даже если пароль украдут, код из SMS или приложения остановит хакера.",
+    icon: Smartphone,
+  },
+  {
+    number: 3,
+    title: "Один пароль — один сервис",
+    desc: "Используй менеджер паролей. Запоминать 100 паролей невозможно, а менеджеру — легко.",
+    icon: KeyRound,
+  },
+  {
+    number: 4,
+    title: "Обновляй всё сразу",
+    desc: "Та надоедливая кнопка «обновить» часто закрывает критические уязвимости.",
+    icon: RefreshCw,
+  },
+  {
+    number: 5,
+    title: "Не кликай вслепую",
+    desc: "Проверяй ссылки перед переходом. Наведи мышь и посмотри адрес внизу браузера.",
+    icon: MousePointer,
+  },
+  {
+    number: 6,
+    title: "Чужой Wi‑Fi = опасность",
+    desc: "В кафе не заходи в банк через открытый Wi‑Fi. Используй VPN или мобильный интернет.",
+    icon: Wifi,
+  },
+  {
+    number: 7,
+    title: "Закрой старые аккаунты",
+    desc: "Те страницы, где ты был 10 лет назад, могут взломать и рассылать спам от твоего имени.",
+    icon: XCircle,
+  },
+  {
+    number: 8,
+    title: "Правило 3-2-1",
+    desc: "3 копии данных, на 2 носителях, 1 за пределами дома. CohortSec сделает это за тебя.",
+    icon: HardDrive,
+  },
+  {
+    number: 9,
+    title: "Лицо вместо пароля",
+    desc: "Биометрия удобнее и безопаснее. В CohortSec можно входить по селфи.",
+    icon: ScanFace,
+  },
+  {
+    number: 10,
+    title: "Проверь, не утекли ли данные",
+    desc: "Наш сервис проверит, не гуляет ли твой пароль по даркнету.",
+    icon: ShieldCheck,
+  },
 ];
 
 export default function SecurityHacks() {
   const [index, setIndex] = useState(0);
   const [paused, setPaused] = useState(false);
-  const trackRef = useRef<HTMLDivElement>(null);
-  const cardWidth = 440;
-  const gap = 32;
+  const [direction, setDirection] = useState(0);
+
+  const next = useCallback(() => {
+    setDirection(1);
+    setIndex((i) => (i + 1) % hacks.length);
+  }, []);
+
+  const prev = useCallback(() => {
+    setDirection(-1);
+    setIndex((i) => (i - 1 + hacks.length) % hacks.length);
+  }, []);
+
+  const goTo = useCallback((i: number) => {
+    setDirection(i > index ? 1 : -1);
+    setIndex(i);
+  }, [index]);
 
   useEffect(() => {
     if (paused) return;
-    const t = setInterval(() => setIndex((i) => (i + 1) % hacks.length), 5000);
+    const t = setInterval(next, 5000);
     return () => clearInterval(t);
-  }, [paused]);
+  }, [paused, next]);
 
   useEffect(() => {
-    const el = trackRef.current;
-    if (!el) return;
-    const viewportWidth = window.innerWidth;
-    const offset = Math.max(0, index * (cardWidth + gap) - viewportWidth / 2 + cardWidth / 2 + gap / 2);
-    el.scrollTo({ left: offset, behavior: "smooth" });
-  }, [index]);
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key === "ArrowRight") next();
+      else if (e.key === "ArrowLeft") prev();
+    };
+    window.addEventListener("keydown", handleKey);
+    return () => window.removeEventListener("keydown", handleKey);
+  }, [next, prev]);
 
-  const prev = () => setIndex((i) => (i - 1 + hacks.length) % hacks.length);
-  const next = () => setIndex((i) => (i + 1) % hacks.length);
+  const current = hacks[index];
+  const Icon = current.icon;
+
+  const variants = {
+    enter: (d: number) => ({
+      x: d > 0 ? 120 : -120,
+      opacity: 0,
+    }),
+    center: {
+      x: 0,
+      opacity: 1,
+    },
+    exit: (d: number) => ({
+      x: d < 0 ? 120 : -120,
+      opacity: 0,
+    }),
+  };
 
   return (
     <section
-      className="py-24 relative w-full overflow-hidden px-3"
+      id="lifehacks"
+      className="relative min-h-screen py-16 md:py-24 overflow-hidden"
       style={{
-        background: "linear-gradient(180deg, #0A0A0F 0%, rgba(139,92,246,0.05) 50%, #0A0A0F 100%)",
+        background: "linear-gradient(180deg, #0A0A0F 0%, rgba(0,255,170,0.03) 50%, #0A0A0F 100%)",
       }}
+      onMouseEnter={() => setPaused(true)}
+      onMouseLeave={() => setPaused(false)}
     >
-      <ScrollReveal className="text-center mb-12">
+      { /* Interactive background */}
+      <HacksBackground />
+
+      { /* Header */}
+      <div className="relative z-10 text-center mb-16 px-4">
         <h2 className="text-3xl md:text-4xl font-bold mb-4">Лайфхаки: защити себя за 5 минут</h2>
-        <p className="text-vg-muted max-w-2xl mx-auto">Простые действия, которые повысят твою безопасность в разы</p>
-      </ScrollReveal>
-      <div
-        className="relative w-screen left-1/2 -translate-x-1/2"
-        onMouseEnter={() => setPaused(true)}
-        onMouseLeave={() => setPaused(false)}
-      >
-        <button
-          onClick={prev}
-          aria-label="Предыдущий"
-          className="absolute left-4 top-1/2 -translate-y-1/2 z-10 w-12 h-12 rounded-full glass flex items-center justify-center hover:bg-primary/20 transition-colors"
-        >
-          <ChevronLeft className="w-6 h-6" />
-        </button>
-        <button
-          onClick={next}
-          aria-label="Следующий"
-          className="absolute right-4 top-1/2 -translate-y-1/2 z-10 w-12 h-12 rounded-full glass flex items-center justify-center hover:bg-primary/20 transition-colors"
-        >
-          <ChevronRight className="w-6 h-6" />
-        </button>
-        <div
-          ref={trackRef}
-          className="flex overflow-x-auto gap-8 py-6 px-4 md:px-16 snap-x snap-mandatory scroll-smooth scrollbar-hide"
-          style={{ WebkitOverflowScrolling: "touch" } as React.CSSProperties}
-        >
-          {hacks.map((h, i) => (
-            <div key={i} className="flex-shrink-0 snap-center" style={{ width: cardWidth }}>
-              <HackCard number={h.number} title={h.title} description={h.desc} />
+        <p className="text-vg-muted max-w-2xl mx-auto">
+          Простые действия, которые повысят твою безопасность в разы
+        </p>
+      </div>
+
+      { /* Slideshow */}
+      <div className="relative z-10 max-w-2xl mx-auto px-4">
+        <AnimatePresence mode="wait" custom={direction}>
+          <motion.div
+            key={index}
+            custom={direction}
+            variants={variants}
+            initial="enter"
+            animate="center"
+            exit="exit"
+            transition={{ duration: 0.4, ease: "easeInOut" }}
+            className="slide-glass rounded-2xl p-8 md:p-10 border border-white/10"
+          >
+            <div className="flex flex-col items-center text-center">
+              <motion.div
+                className="w-16 h-16 md:w-20 md:h-20 rounded-2xl bg-primary/20 flex items-center justify-center mb-6"
+                initial={{ scale: 0.8, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{ delay: 0.2 }}
+              >
+                <Icon className="w-8 h-8 md:w-10 md:h-10 text-[#00FFAA]" strokeWidth={2} />
+              </motion.div>
+              <span className="text-sm font-semibold text-[#00FFAA] tracking-wider mb-3">
+                ЛАЙФХАК #{current.number}
+              </span>
+              <h3 className="text-xl md:text-2xl font-bold mb-4">{current.title}</h3>
+              <p className="text-base text-vg-muted leading-relaxed">{current.desc}</p>
             </div>
-          ))}
-        </div>
-        <div className="flex justify-center gap-2 mt-6">
-          {hacks.map((_, i) => (
-            <button
-              key={i}
-              onClick={() => setIndex(i)}
-              aria-label={`Слайд ${i + 1}`}
-              className={`h-2 rounded-full transition-all ${i === index ? "w-6 bg-primary" : "w-2 bg-vg-muted/50 hover:bg-vg-muted"}`}
-            />
-          ))}
+          </motion.div>
+        </AnimatePresence>
+
+        { /* Navigation */}
+        <div className="flex items-center justify-center gap-4 mt-8">
+          <button
+            onClick={prev}
+            aria-label="Предыдущий"
+            className="w-12 h-12 rounded-full glass flex items-center justify-center hover:bg-primary/20 transition-colors border border-white/10"
+          >
+            <ChevronLeft className="w-6 h-6" />
+          </button>
+          <div className="flex gap-2">
+            {hacks.map((_, i) => (
+              <button
+                key={i}
+                onClick={() => goTo(i)}
+                aria-label={`Слайд ${i + 1}`}
+                className={`h-2 rounded-full transition-all duration-300 ${
+                  i === index ? "w-6 bg-[#00FFAA] shadow-[0_0_12px_rgba(0,255,170,0.5)]" : "w-2 bg-white/30 hover:bg-white/50"
+                }`}
+              />
+            ))}
+          </div>
+          <button
+            onClick={next}
+            aria-label="Следующий"
+            className="w-12 h-12 rounded-full glass flex items-center justify-center hover:bg-primary/20 transition-colors border border-white/10"
+          >
+            <ChevronRight className="w-6 h-6" />
+          </button>
         </div>
       </div>
     </section>

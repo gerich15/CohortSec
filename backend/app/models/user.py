@@ -12,6 +12,11 @@ if TYPE_CHECKING:
     from app.models.user_action import UserAction
     from app.models.user_session import UserSession
     from app.models.anomaly import Anomaly
+    from app.models.face_embedding import FaceEmbedding
+    from app.models.backup_contact import BackupContact
+    from app.models.connected_account import ConnectedAccount
+    from app.models.security_log import SecurityLog
+    from app.models.biometric_settings import BiometricSettings
 
 
 class User(Base):
@@ -36,3 +41,8 @@ class User(Base):
     sessions = relationship("UserSession", back_populates="user", cascade="all, delete")
     actions = relationship("UserAction", back_populates="user", cascade="all, delete")
     anomalies = relationship("Anomaly", back_populates="user", cascade="all, delete")
+    face_embeddings = relationship("FaceEmbedding", back_populates="user", cascade="all, delete")
+    backup_contacts = relationship("BackupContact", back_populates="user", cascade="all, delete")
+    connected_accounts = relationship("ConnectedAccount", back_populates="user", cascade="all, delete")
+    security_logs = relationship("SecurityLog", back_populates="user", cascade="all, delete")
+    biometric_settings = relationship("BiometricSettings", back_populates="user", uselist=False, cascade="all, delete")

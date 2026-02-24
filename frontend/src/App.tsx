@@ -1,6 +1,7 @@
 import { lazy, Suspense } from "react";
 import { Route, Routes, Navigate } from "react-router-dom";
 import AppLayout from "./components/layout/AppLayout";
+import AuthLayout from "./components/layout/AuthLayout";
 import LandingLayout from "./components/layout/LandingLayout";
 import FraudHelpLayout from "./components/layout/FraudHelpLayout";
 import LegalLayout from "./components/layout/LegalLayout";
@@ -87,9 +88,12 @@ export default function App() {
           <Route path="eula" element={<Eula />} />
           <Route path="cookies" element={<CookiePolicy />} />
         </Route>
+      </Route>
+      <Route element={<AuthLayout />}>
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
       </Route>
+      <Route path="/cyber-crime-stats" element={<Navigate to="/cybercrime-stats" replace />} />
       <Route
         path="/app"
         element={

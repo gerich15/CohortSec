@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import {
   BarChart,
   Bar,
@@ -13,10 +13,13 @@ import {
   PieChart,
   Pie,
   Cell,
+  Brush,
 } from "recharts";
 import { BarChart3, TrendingUp, PieChart as PieChartIcon, ExternalLink, Info } from "lucide-react";
 import Card from "../components/ui/Card";
 import ScrollReveal from "../components/animations/ScrollReveal";
+import { DottedSurface } from "../components/ui/DottedSurface";
+import { CyberCrimePresentation } from "../components/presentation/CyberCrimePresentation";
 import { yearlyTotals, categories, sources, lastUpdateYear } from "../data/cybercrimeStats";
 
 function formatThousands(n: number): string {
@@ -25,6 +28,8 @@ function formatThousands(n: number): string {
 }
 
 export default function CybercrimeStats() {
+  const [pieActiveIndex, setPieActiveIndex] = useState<number | undefined>(undefined);
+
   const lineData = useMemo(
     () =>
       yearlyTotals.map((y) => ({
@@ -61,8 +66,16 @@ export default function CybercrimeStats() {
   );
 
   return (
-    <div className="space-y-10 max-w-5xl mx-auto">
-      <ScrollReveal>
+    <>
+      {/* Hero: презентация на весь экран */}
+      <section className="min-h-screen w-full relative z-20" aria-label="Презентация о киберпреступности">
+        <CyberCrimePresentation embedded />
+      </section>
+
+      {/* Статистика */}
+      <DottedSurface>
+        <div id="stats" className="relative z-10 space-y-10 max-w-5xl mx-auto py-8 px-4 scroll-mt-4">
+          <ScrollReveal>
         <div className="flex flex-col gap-2">
           <h1 className="text-3xl font-bold flex items-center gap-3">
             <span className="flex items-center justify-center w-12 h-12 rounded-xl bg-vg-accent/20 text-vg-accent">
@@ -109,7 +122,7 @@ export default function CybercrimeStats() {
             <TrendingUp className="w-5 h-5 text-vg-accent" />
             Динамика: число IT-преступлений по годам
           </h2>
-          <div className="h-[280px] w-full">
+          <div className="h-[320px] w-full">
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={lineData} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
@@ -120,8 +133,9 @@ export default function CybercrimeStats() {
                   labelStyle={{ color: "#fff" }}
                   formatter={(value: number) => [formatThousands(value), "зарегистрировано"]}
                   labelFormatter={(label) => `Год ${label}`}
+                  cursor={{ stroke: "var(--vg-accent)", strokeWidth: 1, strokeDasharray: "4 4" }}
                 />
-                <Legend />
+                <Legend wrapperStyle={{ cursor: "pointer" }} />
                 <Line
                   type="monotone"
                   dataKey="total"
@@ -129,6 +143,14 @@ export default function CybercrimeStats() {
                   stroke="var(--vg-accent)"
                   strokeWidth={2}
                   dot={{ fill: "var(--vg-accent)", r: 4 }}
+                  activeDot={{ r: 6, fill: "var(--vg-accent)", stroke: "white", strokeWidth: 2 }}
+                />
+                <Brush
+                  dataKey="year"
+                  height={24}
+                  stroke="var(--vg-accent)"
+                  fill="var(--vg-surface)"
+                  travellerWidth={10}
                 />
               </LineChart>
             </ResponsiveContainer>
@@ -151,6 +173,7 @@ export default function CybercrimeStats() {
                 <Tooltip
                   contentStyle={{ background: "var(--vg-surface)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 8 }}
                   formatter={(value: number) => [formatThousands(value), "случаев"]}
+                  cursor={{ fill: "rgba(0,255,170,0.1)" }}
                 />
                 <Bar dataKey="value" name="Зарегистрировано (тыс.)" radius={[0, 4, 4, 0]}>
                   {barData.map((entry, i) => (
@@ -179,8 +202,13 @@ export default function CybercrimeStats() {
                   cx="50%"
                   cy="50%"
                   outerRadius={110}
+                  paddingAngle={2}
                   label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
                   labelLine={{ stroke: "rgba(255,255,255,0.4)" }}
+                  activeIndex={pieActiveIndex}
+                  onMouseEnter={(_, index) => setPieActiveIndex(index)}
+                  onMouseLeave={() => setPieActiveIndex(undefined)}
+                  activeShape={{ outerRadius: 120, stroke: "var(--vg-accent)", strokeWidth: 2 }}
                 >
                   {pieData.map((entry, i) => (
                     <Cell key={i} fill={entry.color} stroke="var(--vg-bg)" strokeWidth={2} />
@@ -225,6 +253,8 @@ export default function CybercrimeStats() {
           </ul>
         </Card>
       </ScrollReveal>
-    </div>
+        </div>
+      </DottedSurface>
+    </>
   );
 }

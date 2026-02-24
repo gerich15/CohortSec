@@ -6,10 +6,12 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
+    "build:desktop": "VITE_API_URL=${VITE_API_URL:-https://api.cohortsec.ru/api/v1} vite build",
     "lint": "eslint .",
     "preview": "vite preview"
   },
   "dependencies": {
+    "@tauri-apps/api": "^2",
     "@tanstack/react-table": "^8.13.0",
     "@types/crypto-js": "^4.2.2",
     "axios": "^1.6.7",
