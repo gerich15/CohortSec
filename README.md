@@ -27,14 +27,16 @@ B2C-сервис для защиты себя и семьи в интернет�
 ## Стек
 
 - **Frontend:** React 18, Vite, TypeScript, Tailwind CSS, Framer Motion, Recharts
+- 
 - **Backend:** FastAPI, SQLAlchemy, PostgreSQL, Redis, Celery
+- 
 - **Инфраструктура:** Docker Compose (PostgreSQL, Redis, MinIO, Keycloak, backend, frontend, Celery worker/beat)
 
 ## Быстрый старт
 
 ```bash
 cp .env.example .env
-# При необходимости отредактируйте .env (пароли, SECRET_KEY)
+
 docker compose up --build
 ```
 
@@ -47,7 +49,7 @@ docker compose up --build
 ## Структура проекта
 
 ```
-Vanguard/
+CohortSec/
 ├── frontend/          # React SPA (Vite)
 ├── backend/           # FastAPI, Celery
 ├── docker-compose.yml
